@@ -136,6 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\GameClient.h" />
+    <ClInclude Include="include\GameCommon.h" />
     <ClInclude Include="include\GameServer.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\targetver.h" />

@@ -5,17 +5,17 @@
 
 namespace mentics { namespace game {
 
-namespace com = mentics::common;
+namespace cmn = mentics::common;
 namespace net = mentics::network;
 
-class GameServer : public common::CanLog {
+template <typename TimeType>
+class GameServer : public cmn::CanLog {
 private:
 	net::NetworkServer network;
 
 public:
-	//static GameServer createGameServer();
-
-	GameServer(uint16_t localport) : network(localport) {}
+	GameServer(uint16_t localport) : CanLog("GameServer"),
+		network(localport) {}
 
 	void start() {
 		network.start();

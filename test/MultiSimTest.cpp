@@ -12,6 +12,7 @@
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 
+#include "MenticsCommon.h"
 #include "GameServer.h"
 #include "GameClient.h"
 
@@ -19,7 +20,6 @@
 namespace mentics { namespace game {
 
 using namespace std;
-
 
 TEST_CLASS(MultiSimTest)
 {
@@ -37,9 +37,9 @@ public:
 	static const int MAX_CLIENTS = 100;
 
 	int numClients;
-	GameServer* server;
+	GameServer<TimeOfType>* server;
 	thread* serverThread;
-	array<GameClient*, MAX_CLIENTS> clients;
+	array<GameClient<TimeOfType>*, MAX_CLIENTS> clients;
 	array<thread*, MAX_CLIENTS> threads;
 
 	TEST_METHOD_INITIALIZE(before) {
@@ -51,8 +51,8 @@ public:
 	}
 
 	void createServer() {
-		server = new GameServer(1111);
-		serverThread = new thread(&GameServer::start, server);
+		server = new GameServer<TimeOfType>(1111);
+		serverThread = new thread(&GameServer<TimeOfType>::start, server);
 	}
 
 	void destroyServer() {
@@ -65,8 +65,8 @@ public:
 	void createClients(int num) {
 		numClients = num;
 		for (int i = 0; i < numClients; i++) {
-			clients[i] = new GameClient("localhost", 1111);
-			threads[i] = new thread(&GameClient::start, clients[i]);
+			clients[i] = new GameClient<TimeOfType>(cmn::toString(i), "localhost", 1111);
+			threads[i] = new thread(&GameClient<TimeOfType>::start, clients[i]);
 		}
 	}
 
