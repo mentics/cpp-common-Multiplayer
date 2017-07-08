@@ -86,7 +86,8 @@ public:
 	{
 		createServer();
 		createClients(2);
-		BOOST_LOG_SEV(server->lg, boost::log::trivial::trace) << "testing server stuff ";
+		clients[0]->createGame();
+		clients[1]->joinFirstGame();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}

@@ -21,6 +21,9 @@ public:
 		network.start();
 	}
 
+	uint16_t configureGame(uint16_t numAgents);
+	void startGame(uint16_t gameId);
+
 	void stop() {
 		network.stop();
 	}
