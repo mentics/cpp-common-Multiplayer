@@ -6,8 +6,11 @@
 
 namespace mentics { namespace game {
 
+namespace lvl = boost::log::trivial;
+using boost::asio::ip::udp;
 namespace net = mentics::network;
 namespace sched = mentics::scheduler;
+
 
 class Agent : public cmn::CanLog {
 public:
@@ -37,7 +40,7 @@ public:
 
 
 template <typename TimeType>
-class GameClient : public cmn::CanLog {
+class GameClient : public cmn::CanLog, net::NetworkHandler {
 private:
 	net::NetworkClient network;
 	LocalTimeProvider timeProvider;
@@ -47,7 +50,7 @@ private:
 
 public:
 	GameClient(std::string name, std::string hostname, uint16_t serverPort) : CanLog("GameClient"+name),
-		network(hostname, serverPort),
+		network(hostname, serverPort, this),
 		model("Model" + name), timeProvider(),
 		sched("Scheduler" + name, &model, &timeProvider) {}
 
@@ -64,6 +67,14 @@ public:
 	//void createPlayerAgent(); // TODO: add param for input interface
 	//void createBotAgent(); // TODO: pass in any type info
 	//void createRemoteAgent(); // TODO: pass in remote id or whatever
+
+	void handle(udp::endpoint& endpoint, const std::string& data) override {
+		LOG(lvl::trace) << "network handle";
+	}
+
+	void handleError(udp::endpoint& endpoint, const boost::system::error_code& error) override {
+		LOG(lvl::trace) << "network errorHandle";
+	}
 
 	void stop() {
 		sched.stop();

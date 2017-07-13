@@ -5,24 +5,34 @@
 
 namespace mentics { namespace game {
 
+namespace lvl = boost::log::trivial;
+using boost::asio::ip::udp;
 namespace cmn = mentics::common;
 namespace net = mentics::network;
 
 template <typename TimeType>
-class GameServer : public cmn::CanLog {
+class GameServer : public cmn::CanLog, net::NetworkHandler {
 private:
 	net::NetworkServer network;
 
 public:
 	GameServer(uint16_t localport) : CanLog("GameServer"),
-		network(localport) {}
+		network(localport, this) {}
 
 	void start() {
 		network.start();
 	}
 
-	uint16_t configureGame(uint16_t numAgents);
-	void startGame(uint16_t gameId);
+	void handle(udp::endpoint& endpoint, const std::string& data) override {
+		LOG(lvl::trace) << "network handle";
+	}
+	void handleError(udp::endpoint& endpoint, const boost::system::error_code& error) override {
+		LOG(lvl::trace) << "network errorHandle";
+	}
+
+
+	//uint16_t configureGame(uint16_t numAgents);
+	//void startGame(uint16_t gameId);
 
 	void stop() {
 		network.stop();

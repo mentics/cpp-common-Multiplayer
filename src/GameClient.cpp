@@ -12,7 +12,7 @@ namespace net = mentics::network;
 template <typename TimeType>
 void GameClient<TimeType>::createGame() {
 	LOG(lvl::trace) << "createGame";
-	network.createGame(std::bind(&GameClient::gameCreated, this, std::placeholders::_1));
+	//network.createGame(std::bind(&GameClient::gameCreated, this, std::placeholders::_1));
 }
 
 template <typename TimeType>
