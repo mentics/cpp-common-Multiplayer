@@ -19,24 +19,15 @@ public:
 	GameServer(uint16_t localport) : CanLog("GameServer"),
 		network(localport, this) {}
 
-	void start() {
-		network.start();
-	}
+	void start();
 
-	void handle(udp::endpoint& endpoint, const std::string& data) override {
-		LOG(lvl::trace) << "network handle";
-	}
-	void handleError(udp::endpoint& endpoint, const boost::system::error_code& error) override {
-		LOG(lvl::trace) << "network errorHandle";
-	}
-
+	void handle(udp::endpoint& endpoint, const std::string& data) override;
+	void handleError(udp::endpoint& endpoint, const boost::system::error_code& error) override;
 
 	//uint16_t configureGame(uint16_t numAgents);
 	//void startGame(uint16_t gameId);
 
-	void stop() {
-		network.stop();
-	}
+	void stop();
 };
 
 }}

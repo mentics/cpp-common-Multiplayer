@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "MenticsCommon.h"
 #include "GameServer.h"
 
 namespace mentics { namespace game {
@@ -13,6 +14,28 @@ namespace mentics { namespace game {
 //void GameServer<TimeType>::startGame(net::GameIdType gameId) {
 //	
 //}
+
+template <typename TimeType>
+void GameServer<TimeType>::
+	start() {
+	network.start();
+}
+
+template <typename TimeType>
+void GameServer<TimeType>::handle(udp::endpoint& endpoint, const std::string& data) {
+	LOG(lvl::trace) << "network handle";
+}
+
+template <typename TimeType>
+void GameServer<TimeType>::handleError(udp::endpoint& endpoint, const boost::system::error_code& error) {
+	LOG(lvl::trace) << "network errorHandle";
+}
+
+template <typename TimeType>
+void GameServer<TimeType>::stop() {
+	network.stop();
+}
+
 
 template class GameServer<uint64_t>;
 

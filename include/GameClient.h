@@ -54,32 +54,21 @@ public:
 		model("Model" + name), timeProvider(),
 		sched("Scheduler" + name, &model, &timeProvider) {}
 
-	void start() {
-		network.start();
-	}
-
+	void start();
 	void createGame();
-	void gameCreated(const net::GameInfo& info);
+	void gameCreated(const GameInfo& info);
 	void joinFirstGame();
-	void joinGame(net::GameIdType gameId);
-	void gameJoined(net::GameInfo& info);
+	void joinGame(GameIdType gameId);
+	void gameJoined(GameInfo& info);
 
 	//void createPlayerAgent(); // TODO: add param for input interface
 	//void createBotAgent(); // TODO: pass in any type info
 	//void createRemoteAgent(); // TODO: pass in remote id or whatever
 
-	void handle(udp::endpoint& endpoint, const std::string& data) override {
-		LOG(lvl::trace) << "network handle";
-	}
+	void handle(udp::endpoint& endpoint, const std::string& data) override;
+	void handleError(udp::endpoint& endpoint, const boost::system::error_code& error) override;
 
-	void handleError(udp::endpoint& endpoint, const boost::system::error_code& error) override {
-		LOG(lvl::trace) << "network errorHandle";
-	}
-
-	void stop() {
-		sched.stop();
-		network.stop();
-	}
+	void stop();
 };
 
 }}

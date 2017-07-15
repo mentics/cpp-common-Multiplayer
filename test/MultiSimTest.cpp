@@ -15,6 +15,7 @@
 #include "MenticsCommon.h"
 #include "GameServer.h"
 #include "GameClient.h"
+#include "MenticsCommonTest.h"
 
 
 namespace mentics { namespace game {
@@ -25,71 +26,44 @@ TEST_CLASS(MultiSimTest)
 {
 public:
 	TEST_CLASS_INITIALIZE(BeforeClass) {
-		auto sink = boost::log::add_file_log("unit-test.log");
-		sink->locked_backend()->auto_flush(true);
-		boost::log::core::get()->set_filter
-		(
-			boost::log::trivial::severity >= boost::log::trivial::trace
-		);
-		boost::log::add_common_attributes();
+		mentics::test::setupLog();
 	}
-
-	static const int MAX_CLIENTS = 100;
-
-	int numClients;
-	GameServer<TimeOfType>* server;
-	thread* serverThread;
-	array<GameClient<TimeOfType>*, MAX_CLIENTS> clients;
-	array<thread*, MAX_CLIENTS> threads;
 
 	TEST_METHOD_INITIALIZE(before) {
 	}
 
 	TEST_METHOD_CLEANUP(after) {
-		destroyClients();
-		destroyServer();
 	}
 
-	void createServer() {
-		server = new GameServer<TimeOfType>(1111);
-		serverThread = new thread(&GameServer<TimeOfType>::start, server);
-	}
+	TEST_METHOD(TestMultiSim) {
+		const int numClients = 1;
 
-	void destroyServer() {
-		server->stop();
-		serverThread->join();
-		delete server;
-		delete serverThread;
-	}
+		GameServer<TimeOfType> server(1111);
+		std::thread serverThread = std::thread(&GameServer<TimeOfType>::start, &server);
 
-	void createClients(int num) {
-		numClients = num;
+		std::vector<GameClient<TimeOfType>*> clients;
+		std::vector<std::thread*> clientThreads;
 		for (int i = 0; i < numClients; i++) {
-			clients[i] = new GameClient<TimeOfType>(cmn::toString(i), "localhost", 1111);
-			threads[i] = new thread(&GameClient<TimeOfType>::start, clients[i]);
+			GameClient<TimeOfType>* c = new GameClient<TimeOfType>("GameClient" + boost::lexical_cast<std::string>(i),
+				"localhost", 1111);
+			clients.push_back(c);
+			std::thread* clientThread = new std::thread(&GameClient<TimeOfType>::start, c);
+			clientThreads.push_back(clientThread);
 		}
-	}
 
-	void destroyClients() {
-		for (int i = 0; i < numClients; i++) {
-			clients[i]->stop();
-		}
-		for (int i = 0; i < numClients; i++) {
-			threads[i]->join();
-			delete clients[i];
-			delete threads[i];
-		}
-	}
-
-
-	TEST_METHOD(TestMultiSim)
-	{
-		createServer();
-		createClients(2);
 		clients[0]->createGame();
-		clients[1]->joinFirstGame();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+		for (int i = 0; i < numClients; i++) {
+			clients[i]->stop();
+			clientThreads[i]->join();
+			delete clients[i];
+			delete clientThreads[i];
+		}
+
+		server.stop();
+		serverThread.join();
 	}
 };
 

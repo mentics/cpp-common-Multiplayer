@@ -127,9 +127,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\GameClient.cpp" />
     <ClCompile Include="src\GameServer.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
