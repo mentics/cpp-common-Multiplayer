@@ -41,34 +41,33 @@ public:
 
 template <typename TimeType>
 class GameClient : public cmn::CanLog, net::NetworkHandler {
-private:
-	net::NetworkClient network;
-	LocalTimeProvider timeProvider;
-	sched::SchedulerModel<TimeType> model;
-	sched::Scheduler<TimeType> sched;
-	std::vector<Agent*> agents;
-
 public:
-	GameClient(std::string name, std::string hostname, uint16_t serverPort) : CanLog("GameClient"+name),
-		network(hostname, serverPort, this),
+	GameClient(std::string name, const udp::endpoint& endpoint) : CanLog("GameClient"+name),
+		network(endpoint, this),
 		model("Model" + name), timeProvider(),
 		sched("Scheduler" + name, &model, &timeProvider) {}
 
 	void start();
-	void createGame();
-	void gameCreated(const GameInfo& info);
-	void joinFirstGame();
-	void joinGame(GameIdType gameId);
-	void gameJoined(GameInfo& info);
+	void stop();
+
+	void getId();
+	//void createGame();
+	//void joinGame(GameIdType gameId);
 
 	//void createPlayerAgent(); // TODO: add param for input interface
 	//void createBotAgent(); // TODO: pass in any type info
 	//void createRemoteAgent(); // TODO: pass in remote id or whatever
 
-	void handle(udp::endpoint& endpoint, const std::string& data) override;
+	bool handle(udp::endpoint& endpoint, net::MsgIdType msgId, const std::string& data) override;
 	void handleError(udp::endpoint& endpoint, const boost::system::error_code& error) override;
 
-	void stop();
+private:
+	ClientIdType id = INVALID_CLIENT_ID;
+	net::NetworkClient network;
+	LocalTimeProvider timeProvider;
+	sched::SchedulerModel<TimeType> model;
+	sched::Scheduler<TimeType> sched;
+	std::vector<Agent*> agents;
 };
 
 }}

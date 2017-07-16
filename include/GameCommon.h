@@ -2,6 +2,9 @@
 
 #include <chrono>
 
+#include <cereal/archives/binary.hpp>
+#include <cereal/archives/portable_binary.hpp>
+
 #include "MenticsCommon.h"
 #include "NetworkBase.h"
 #include "Scheduler.h"
@@ -27,15 +30,17 @@ struct ClientInfo {
 	ClientInfo(ClientIdType clientId, udp::endpoint& target) : id(clientId), clientEndpoint(target) {}
 };
 
+enum MessageType : byte { GetId = 1, CreateGame = 2, JoinGame = 3 };
+
 struct GameInfo {
-	GameIdType gameId;
+	GameIdType id;
 
-
-	GameInfo(GameIdType gameId) : gameId(gameId) {}
+	GameInfo() {}
+	GameInfo(GameIdType gameId) : id(gameId) {}
 
 	template<typename Archive>
 	void serialize(Archive& ar) {
-		ar(gameId);
+		ar(id);
 	}
 };
 
@@ -48,5 +53,29 @@ struct LocalTimeProvider : public sched::SchedulerTimeProvider<TimeOfType> {
 		return t - cmn::currentTimeMillis();
 	}
 };
+
+template <typename T>
+inline std::string serialize(const T& obj) {
+	std::stringstream ss;
+	cereal::BinaryOutputArchive out(ss);
+	out(obj);
+	return ss.str();
+}
+
+//template <typename T, typename S>
+//inline std::string serialize(const T& obj, const S& obj2) {
+//	std::stringstream ss;
+//	cereal::BinaryOutputArchive out(ss);
+//	out(obj, obj2);
+//	return ss.str();
+//}
+
+
+template <typename T>
+inline void deserialize(T& obj, const std::string& data) {
+	std::istringstream is(data);
+	cereal::BinaryInputArchive in(is);
+	in(obj);
+}
 
 }}

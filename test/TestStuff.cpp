@@ -78,30 +78,8 @@ public:
 		//cereal::BinaryInputArchive iarchive(is);
 		//iarchive(loadInfo);
 
-		Assert::AreEqual<int>(37, loadInfo.gameId);
+		Assert::AreEqual<int>(37, loadInfo.id);
 	}
-
-	template <typename T>
-	std::string serialize(const T& obj) {
-		std::stringstream ss;
-		cereal::BinaryOutputArchive out(ss);
-		out(obj);
-		return ss.str();
-	}
-
-
-	//void deserialize(GameInfo& obj, std::string data) {
-	//	cereal::BinaryInputArchive iarchive(std::istringstream(data));
-	//	iarchive(obj);
-	//}
-
-	template <typename T>
-	void deserialize(T& obj, std::string data) {
-		std::istringstream is(data);
-		cereal::BinaryInputArchive in(is);
-		in(obj);
-	}
-	
 };
 
 }}
