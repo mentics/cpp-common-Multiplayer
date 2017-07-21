@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 
 #include <thread>
+#include <future>
 
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
@@ -18,6 +19,7 @@
 #include "GameClient.h"
 #include "MenticsCommonTest.h"
 
+using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace mentics { namespace game {
 
@@ -55,9 +57,26 @@ public:
 			//clientThreads.push_back(clientThread);
 		}
 
-		clients[0]->getId();
+		std::promise<std::string> promise;
+		clients[0]->handler = [&promise](const std::string& data) {
+			promise.set_value(data);
+		};
+		std::string result;
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		clients[0]->getId();
+		result = promise.get_future().get();
+		promise = std::promise<std::string>();
+		Assert::AreEqual((ClientIdType)1, clients[0]->clientId, L"", LINE_INFO());
+
+		clients[0]->createGame(GameParams() = { GameType::Basic });
+		result = promise.get_future().get();
+		promise = std::promise<std::string>();
+		Assert::AreEqual((uint32_t)1, (uint32_t)clients[0]->gameInfo.id, L"", LINE_INFO());
+
+		clients[0]->joinGame(GameJoinParams() = { 1 });
+		result = promise.get_future().get();
+		promise = std::promise<std::string>();
+		Assert::AreEqual((uint32_t)1, (uint32_t)clients[0]->gameInfo.id, L"", LINE_INFO());
 
 		for (int i = 0; i < numClients; i++) {
 			clients[i]->stop();

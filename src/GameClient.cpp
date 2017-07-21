@@ -22,21 +22,33 @@ bool GameClient<TimeType>::handle(udp::endpoint& endpoint, net::MsgIdType msgId,
 	LOG(lvl::trace) << "network handle";
 	MessageType msgType;
 	deserialize(msgType, data);
+	std::string payload = data.substr(sizeof(msgType));
 	switch (msgType) {
-	case GetId:
-		// TODO: fix this
-		std::string data2 = data.substr(sizeof(msgType));
-		ClientIdType clientId;
-		deserialize(clientId, data2);
-		LOG(lvl::info) << "Received clientId=" << clientId;
+	case GetId: {
+		deserialize(clientId, payload);
+		LOG(lvl::info) << "GetId received clientId=" << clientId;
 		break;
+	}
+	case CreateGame: {
+		deserialize(gameInfo, payload);
+		LOG(lvl::info) << "CreateGame received gameInfo=" << gameInfo;
+		break;
+	}
+	case JoinGame: {
+		deserialize(gameState, payload);
+		LOG(lvl::info) << "JoinGame received gameInfo=" << gameState;
+		break;
+	}
+	}
+	if (handler != nullptr) {
+		handler(data);
 	}
 	return true;
 }
 
 template <typename TimeType>
 void GameClient<TimeType>::handleError(udp::endpoint& endpoint, const boost::system::error_code& error) {
-	LOG(lvl::trace) << "network errorHandle";
+	LOG(lvl::trace) << "handling error " << error << " for endpoint " << endpoint;
 	// TODO
 }
 
@@ -55,36 +67,28 @@ void GameClient<TimeType>::stop() {
 template <typename TimeType>
 void GameClient<TimeType>::getId() {
 	LOG(lvl::trace) << "getId";
-	network.submit(ptime::milliseconds(500), 10, serialize(MessageType::GetId), [this](const udp::endpoint& endpoint, const std::string& data) {
-		deserialize(this->id, data);
-		LOG(lvl::info) << "Client was assigned clientId=" + this->id;
-	});
+	network.submit(ptime::milliseconds(500), 10, serialize(MessageType::GetId), nullptr);
 }
 
-//template <typename TimeType>
-//void GameClient<TimeType>::createGame() {
-//	LOG(lvl::trace) << "createGame";
-//	std::string data;
-//	data += MessageType::CreateGame; // TODO: simplify
-//	network.submit(ptime::seconds(1), 10, data, [this](const udp::endpoint& endpoint, const std::string& data) {
-//		GameInfo info;
-//		deserialize(info, data);
-//		LOG(lvl::info) << "Client created game id=" + info.id;
-//	});
-//}
-//
-//template <typename TimeType>
-//void GameClient<TimeType>::joinGame(GameIdType gameId) {
-//	LOG(lvl::trace) << "joinGame";
-//	std::string data;
-//	data += MessageType::JoinGame;
-//	data += boost::lexical_cast<std::string>(gameId);
-//	network.submit(ptime::seconds(1), 10, data, [this](const udp::endpoint& endpoint, const std::string& data) {
-//		GameInfo info;
-//		deserialize(info, data);
-//		LOG(lvl::info) << "Client created game id=" + info.id;
-//	});
-//}
+template <typename TimeType>
+void GameClient<TimeType>::createGame(const GameParams& params) {
+	LOG(lvl::trace) << "createGame";
+	send(MessageType::CreateGame, serialize(params), nullptr);
+}
+
+template <typename TimeType>
+void GameClient<TimeType>::joinGame(const GameJoinParams& params) {
+	LOG(lvl::trace) << "joinGame";
+	send(MessageType::JoinGame, serialize(params), nullptr);
+}
+
+template <typename TimeType>
+void GameClient<TimeType>::send(MessageType msgType, std::string data,
+		net::MessageCallbackType callback) {
+	// NOTE: optimize
+	std::string full = serialize(msgType) + serialize(clientId) + data;
+	network.submit(ptime::milliseconds(250), 10, full, callback);
+}
 
 template class GameClient<uint64_t>;
 

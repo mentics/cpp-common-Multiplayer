@@ -17,6 +17,7 @@ class GameServer : public cmn::CanLog, net::NetworkHandler {
 public:
 	GameServer(uint16_t localport) : CanLog("GameServer"),
 		nextClientId(1),
+		nextGameId(1),
 		network(localport, this) {}
 
 	void start();
@@ -31,6 +32,7 @@ public:
 
 private:
 	ClientIdType nextClientId;
+	GameIdType nextGameId;
 	net::NetworkServer network;
 	std::vector<ClientInfo> clients;
 };

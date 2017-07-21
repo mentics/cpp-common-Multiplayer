@@ -32,15 +32,66 @@ struct ClientInfo {
 
 enum MessageType : byte { GetId = 1, CreateGame = 2, JoinGame = 3 };
 
+enum GameType : byte { Basic = 1 };
+
+struct GameParams {
+	GameType type;
+
+	template<typename Archive>
+	void serialize(Archive& ar) {
+		ar(type);
+	}
+
+	template<typename charT, typename Traits>
+	friend std::basic_ostream<charT, Traits>& operator<<(std::basic_ostream<charT, Traits>& os, const GameParams& obj) {
+		os << "GameParams { type=" << obj.type << "}";
+		return os;
+	}
+};
+
 struct GameInfo {
 	GameIdType id;
+	GameParams params;
 
-	GameInfo() {}
-	GameInfo(GameIdType gameId) : id(gameId) {}
+	template<typename Archive>
+	void serialize(Archive& ar) {
+		ar(id, params);
+	}
+
+	template<typename charT, typename Traits>
+	friend std::basic_ostream<charT, Traits>& operator<<(std::basic_ostream<charT, Traits>& os, const GameInfo& obj) {
+		os << "GameInfo { id=" << obj.id << ", params=" << obj.params << "}";
+		return os;
+	}
+};
+
+struct GameJoinParams {
+	GameIdType id;
 
 	template<typename Archive>
 	void serialize(Archive& ar) {
 		ar(id);
+	}
+
+	template<typename charT, typename Traits>
+	friend std::basic_ostream<charT, Traits>& operator<<(std::basic_ostream<charT, Traits>& os, const GameJoinParams& obj) {
+		os << "GameJoinParams { id=" << obj.id << "}";
+		return os;
+	}
+};
+
+struct GameState {
+	GameIdType id;
+
+	template<typename Archive>
+	void serialize(Archive& ar) {
+		ar(id);
+	}
+
+	template<typename charT, typename Traits>
+	friend std::basic_ostream<charT, Traits>& operator<<(std::basic_ostream<charT, Traits>& os, const GameState& obj) {
+		os << "GameState { id=" << obj.id << "}";
+		return os;
 	}
 };
 

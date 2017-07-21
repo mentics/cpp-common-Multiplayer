@@ -69,7 +69,8 @@ public:
 	}
 
 	TEST_METHOD(TestSerialize) {
-		GameInfo saveInfo(37), loadInfo(-1);
+		GameInfo saveInfo = { (GameIdType)37 };
+		GameInfo loadInfo = { (GameIdType)-1 };
 
 		std::string saved = serialize(saveInfo);
 		deserialize(loadInfo, saved);

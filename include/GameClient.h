@@ -42,6 +42,11 @@ public:
 template <typename TimeType>
 class GameClient : public cmn::CanLog, net::NetworkHandler {
 public:
+	ClientIdType clientId = INVALID_CLIENT_ID;
+	GameInfo gameInfo;
+	GameState gameState;
+	std::function<void(const std::string&)> handler = nullptr;
+
 	GameClient(std::string name, const udp::endpoint& endpoint) : CanLog("GameClient"+name),
 		network(endpoint, this),
 		model("Model" + name), timeProvider(),
@@ -51,8 +56,8 @@ public:
 	void stop();
 
 	void getId();
-	//void createGame();
-	//void joinGame(GameIdType gameId);
+	void createGame(const GameParams& params);
+	void joinGame(const GameJoinParams& params);
 
 	//void createPlayerAgent(); // TODO: add param for input interface
 	//void createBotAgent(); // TODO: pass in any type info
@@ -61,8 +66,10 @@ public:
 	bool handle(udp::endpoint& endpoint, net::MsgIdType msgId, const std::string& data) override;
 	void handleError(udp::endpoint& endpoint, const boost::system::error_code& error) override;
 
+protected:
+	void send(MessageType msgType, std::string data, net::MessageCallbackType callback);
+
 private:
-	ClientIdType id = INVALID_CLIENT_ID;
 	net::NetworkClient network;
 	LocalTimeProvider timeProvider;
 	sched::SchedulerModel<TimeType> model;

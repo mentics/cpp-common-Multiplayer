@@ -17,17 +17,47 @@ void GameServer<TimeType>::start() {
 
 template <typename TimeType>
 bool GameServer<TimeType>::handle(udp::endpoint& endpoint, net::MsgIdType msgId, const std::string& data) {
-	LOG(lvl::trace) << "network handle";
 	MessageType msgType;
 	deserialize(msgType, data);
+	ClientIdType clientId;
+	size_t offset = sizeof(MessageType);
+	if (data.length() > offset) {
+		deserialize(clientId, data.substr(offset));
+		offset += sizeof(ClientIdType);
+	}
+	std::string payload = data.substr(offset);
 	switch (msgType) {
-	case GetId:
-		clients.emplace_back(nextClientId++, endpoint);
-		std::string out = serialize(MessageType::GetId) + serialize(nextClientId - 1);
-		network.submitReply(endpoint, ptime::milliseconds(250), 4,
-			out, nullptr, msgId);
+	case GetId: {
+		ClientIdType newClientId = nextClientId;
+		nextClientId++;
+		clients.emplace_back(newClientId, endpoint);
+		std::string out = serialize(MessageType::GetId) + serialize(newClientId);
+		LOG(lvl::info) << "handled GetId " << newClientId;
+		network.submitReply(endpoint, ptime::milliseconds(250), 8, out, nullptr, msgId);
 		return false;
 	}
+	case CreateGame: {
+		GameIdType newGameId = nextGameId;
+		nextGameId++;
+		GameParams params;
+		deserialize(params, payload);
+		GameInfo info = { newGameId, params };
+		std::string out = serialize(MessageType::CreateGame) + serialize(info);
+		LOG(lvl::info) << "handled CreateGame " << newGameId;
+		network.submitReply(endpoint, ptime::milliseconds(250), 8, out, nullptr, msgId);
+		return false;
+	}
+	case JoinGame: {
+		GameJoinParams params;
+		deserialize(params, payload);
+		GameState state = { params.id };
+		std::string out = serialize(MessageType::JoinGame) + serialize(state);
+		LOG(lvl::info) << "handled JoinGame " << params.id;
+		network.submitReply(endpoint, ptime::milliseconds(250), 8, out, nullptr, msgId);
+		return false;
+	}
+	}
+	LOG(lvl::warning) << "network handled unsupported message type " << msgType;
 	return true;
 }
 
