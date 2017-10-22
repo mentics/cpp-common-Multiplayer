@@ -4,10 +4,6 @@
 #include <thread>
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/portable_binary.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/sinks/text_file_backend.hpp>
-#include <boost/log/utility/setup/file.hpp>
-#include <boost/log/trivial.hpp>
 #include "NetworkServer.h"
 #include "GameCommon.h"
 #include "MenticsCommonTest.h"
