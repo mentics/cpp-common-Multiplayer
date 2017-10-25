@@ -3,6 +3,7 @@
 #include "NetworkClient.h"
 #include "Scheduler.h"
 #include "GameCommon.h"
+#include "Agent.h"
 
 namespace mentics { namespace game {
 
@@ -10,12 +11,6 @@ namespace lvl = boost::log::trivial;
 using boost::asio::ip::udp;
 namespace net = mentics::network;
 namespace sched = mentics::scheduler;
-
-
-class Agent : public cmn::CanLog {
-public:
-
-};
 
 class PlayerAgent : public Agent {
 

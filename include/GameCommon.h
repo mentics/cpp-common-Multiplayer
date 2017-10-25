@@ -95,9 +95,14 @@ struct GameState {
 	}
 };
 
+// TODO: replace with realtime provider or something
 struct LocalTimeProvider : public sched::SchedulerTimeProvider<TimeOfType> {
 	TimeOfType maxTimeAhead() {
 		return 2000;
+	}
+
+	TimeOfType now() {
+		return cmn::currentTimeMillis();
 	}
 
 	TimeOfType realTimeUntil(TimeOfType t) {
